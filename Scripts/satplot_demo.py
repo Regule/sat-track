@@ -9,6 +9,7 @@ from beyond.io.tle import Tle
 from beyond.dates import Date, timedelta
 
 matplotlib.use("Agg")
+matplotlib.rcParams['savefig.pad_inches'] = 0
 import matplotlib.backends.backend_agg as agg
 
 ISS_TLE = Tle("""ISS (ZARYA)
@@ -81,6 +82,7 @@ clock = pygame.time.Clock()
 orb, coords = tle_to_coordinate_list(ISS_TLE)
 
 running = True
+im = plt.imread('Data/earth.jpg')
 
 # Animation loop
 while running:
@@ -97,12 +99,19 @@ while running:
     try:
         lons, lats = next(coords)
         fig = pylab.figure(figsize=[8, 4], # Inches
-                   dpi=100,        # 100 dots per inch, so the resulting buffer is 400x400 pixels
+                   dpi=100,
                    )
+        fig.tight_layout(pad=0)
         ax = fig.gca()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+        #ax.set_axis_off()
+        #ax.margins(x=0, y=0)
+        plt.autoscale(tight=True)
+        #ax.imshow(im, extent=[-180, 180, -90, 90])
         ax.set_xlim([-180, 180])
         ax.set_ylim([-90, 90])
-        ax.plot([lons], [lats], 'ro')
+        ax.plot([lons], [lats], 'ro', linestyle='none')
 
         canvas = agg.FigureCanvasAgg(fig)
         canvas.draw()
@@ -119,7 +128,7 @@ while running:
 
 
     # Control the animation speed
-    clock.tick(120)
+    clock.tick(240)
 
 # Quit the program
 pygame.quit()
