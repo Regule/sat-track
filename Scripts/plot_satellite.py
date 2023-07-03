@@ -74,3 +74,15 @@ class ExtendedArgumentParser(argparse.ArgumentParser):
         except ET.ParseError:
             print("Error parsing XML file.")
         return defaults
+
+#---------------------------------------------------------------------------------------------------
+#                                            MAIN FUNCTION 
+#---------------------------------------------------------------------------------------------------
+
+def main(args):
+    pass
+
+if __name__ == '__main__':
+    parser = ExtendedArgumentParser()
+    args = parser.parse_args()
+    main(args)
