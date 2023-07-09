@@ -1,7 +1,4 @@
 #include "DateTime.h"
-#include <iostream>
-#include <sstream>
-#include <iomanip>
 
 DateTime::DateTime()
     : year(0), month(0), day(0), hour(0), minute(0), second(0) {}
