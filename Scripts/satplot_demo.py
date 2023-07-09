@@ -108,7 +108,7 @@ while running:
         #ax.set_axis_off()
         #ax.margins(x=0, y=0)
         plt.autoscale(tight=True)
-        #ax.imshow(im, extent=[-180, 180, -90, 90])
+        ax.imshow(im, extent=[-180, 180, -90, 90])
         ax.set_xlim([-180, 180])
         ax.set_ylim([-90, 90])
         ax.plot([lons], [lats], 'ro', linestyle='none')
