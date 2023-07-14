@@ -10,7 +10,7 @@ class HeadCanvas:
     def __init__(self, file_path, fps, position):
         self.video = VideoFileClip(file_path)
         self.frames = self.video.iter_frames()
-        self.update_period = MILLISECONDS_PER_SECOND/fps
+        self.update_period = MILLISECONDS_PER_SECOND/(fps)
         self.time_since_last_update = self.update_period # Always update at first call 
         self.position = position
 
@@ -18,13 +18,16 @@ class HeadCanvas:
         self.time_since_last_update += dt
         if self.time_since_last_update < self.update_period:
             return
+        self.time_since_last_update = 0
         try:
             frame = next(self.frames)
             gif_surface = pygame.surfarray.make_surface(frame)
             screen.blit(gif_surface, self.position)
         except StopIteration:
-            # If we've reached the end of the GIF, restart from the beginning
             self.frames = self.video.iter_frames()
+            frame = next(self.frames)
+            gif_surface = pygame.surfarray.make_surface(frame)
+            screen.blit(gif_surface, self.position)
 
 
 class ManWhoLaughsDisplay:
@@ -40,6 +43,7 @@ class ManWhoLaughsDisplay:
         self.handle_events()
         dt = self.clock.tick()
         self.head.update(dt, self.screen)
+        pygame.display.flip()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -50,12 +54,14 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-g', '--gif_file', type=str, required=True,
                         help='Path to GIF file')
+    parser.add_argument('--gif_fps', type=int, default=60,
+                        help='Frames per second of gif animation')
     return parser.parse_args()
 
 
 def main():
     args = parse_arguments()
-    head = HeadCanvas(args.gif_file, 10, (0,0))
+    head = HeadCanvas(args.gif_file, args.gif_fps, (0,0))
     mwl_display = ManWhoLaughsDisplay(head, None, None, (800,600))
     try:
         while True:
