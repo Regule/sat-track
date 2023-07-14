@@ -54,6 +54,7 @@ def create_trace_file(satellite, time_domain, output_folder):
         for t in time_domain:
             latitute , longitude = calculate_position(satellite, t)
             timestamp = time.mktime(t.timetuple())
+            timestamp = int(timestamp)
             sat_file.write(f'{timestamp};{latitute};{longitude}\n')
 
 def datetime_str(text):

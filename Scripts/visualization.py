@@ -70,16 +70,19 @@ class Satellites:
         if initial_timestamp is None:
             initial_timestamp = datetime.now()
             initial_timestamp = time.mktime(initial_timestamp.timetuple())
+        self.update_positions()
+        skipped_positions = 0
+        while list(self.positions.values())[0].timestamp < initial_timestamp:
             self.update_positions()
-            while list(self.positions.values())[0].timestamp < initial_timestamp:
-                self.update_positions()
+            skipped_positions += 1
+        print(f'Skipped {skipped_positions} positions.')
 
 
     def update(self):
         pass
 
     def cleanup(self):
-        for _, file in self.sats:
+        for _, file in self.sats.items():
             file.close()
 
 class EarthCanvas:
