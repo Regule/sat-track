@@ -1,3 +1,4 @@
+import time
 import argparse
 import datetime
 import os
@@ -50,9 +51,10 @@ def create_trace_file(satellite, time_domain, output_folder):
     file_path = os.path.join(output_folder, f'{satellite.name.replace(" ","_")}.txt')
     with open(file_path, 'w') as sat_file:
         time_domain.reset()
-        for time in time_domain:
-            latitute , longitude = calculate_position(satellite, time)
-            sat_file.write(f'{time.strftime(TIME_FORMAT)};{latitute};{longitude}\n')
+        for t in time_domain:
+            latitute , longitude = calculate_position(satellite, t)
+            timestamp = time.mktime(t.timetuple())
+            sat_file.write(f'{timestamp};{latitute};{longitude}\n')
 
 def datetime_str(text):
     return datetime.datetime.strptime(text, TIME_FORMAT)
