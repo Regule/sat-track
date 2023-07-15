@@ -78,8 +78,12 @@ class Satellites:
         print(f'Skipped {skipped_positions} positions.')
 
 
-    def update(self):
-        pass
+    def update(self, dt):
+        self.time_since_last_update += dt
+        if self.time_since_last_update < self.update_period:
+            return
+        self.update_positions()
+        self.time_since_last_update = 0
 
     def cleanup(self):
         for _, file in self.sats.items():
@@ -92,6 +96,10 @@ class EarthCanvas:
         self.position = position
         self.size = size
         self.satellites = satellites
+
+    def update(self, dt, screen):
+        self.satellites.update(dt)
+        screen.blit(self.backdrop, self.position)
 
     def cleanup(self):
         self.satellites.cleanup()
@@ -108,6 +116,7 @@ class ManWhoLaughsDisplay:
         self.handle_events()
         dt = self.clock.tick()
         self.head.update(dt, self.screen)
+        self.earth.update(dt, self.screen)
         pygame.display.flip()
 
     def handle_events(self):
