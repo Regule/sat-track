@@ -100,6 +100,14 @@ class EarthCanvas:
     def update(self, dt, screen):
         self.satellites.update(dt)
         screen.blit(self.backdrop, self.position)
+        for _, position in self.satellites.positions.items():
+            self.draw_position(position, screen)
+
+    def draw_position(self, position, screen):
+        x = int((position.lon + 180) * (self.size[0] / 360))
+        y = int((90 - position.lat) * (self.size[1] / 180))
+        print(f'{x} -- {y}')
+        pygame.draw.circle(screen, (255, 255, 255), (x, y), 2)
 
     def cleanup(self):
         self.satellites.cleanup()
@@ -115,6 +123,7 @@ class ManWhoLaughsDisplay:
     def update(self):
         self.handle_events()
         dt = self.clock.tick()
+        self.screen.fill((0,0,0))
         self.head.update(dt, self.screen)
         self.earth.update(dt, self.screen)
         pygame.display.flip()
