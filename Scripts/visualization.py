@@ -66,11 +66,13 @@ class Satellites:
             position = Position(timestamp, lat, lon)
             self.positions[sat_name] = position
 
-    def set_initial_readout(self, initial_timestamp=None):
+    def set_initial_readout(self, initial_timestamp=None, update_timestamps=True):
         if initial_timestamp is None:
             initial_timestamp = datetime.now()
             initial_timestamp = time.mktime(initial_timestamp.timetuple())
         self.update_positions()
+        if not update_timestamps:
+            return
         skipped_positions = 0
         while list(self.positions.values())[0].timestamp < initial_timestamp:
             self.update_positions()
@@ -104,9 +106,9 @@ class EarthCanvas:
             self.draw_position(position, screen)
 
     def draw_position(self, position, screen):
-        x = int((position.lon + 180) * (self.size[0] / 360))
-        y = int((90 - position.lat) * (self.size[1] / 180))
-        print(f'{x} -- {y}')
+        x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
+        y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
+        #print(f'{x} -- {y}')
         pygame.draw.circle(screen, (255, 255, 255), (x, y), 2)
 
     def cleanup(self):
@@ -123,7 +125,6 @@ class ManWhoLaughsDisplay:
     def update(self):
         self.handle_events()
         dt = self.clock.tick()
-        self.screen.fill((0,0,0))
         self.head.update(dt, self.screen)
         self.earth.update(dt, self.screen)
         pygame.display.flip()
@@ -159,6 +160,8 @@ def parse_arguments():
                         help='Initial timestampt in unix format, set only during tests.')
     parser.add_argument('--sampling_rate', type=int, default=1,
                         help='Sampling rate of satellite positions in seconds')
+    parser.add_argument('--disable_timestamp_adjustment', action='store_true',
+                        help='Disables adjustment of timestamps in satellite file (FOR TESTS ONLY).')
     return parser.parse_args()
 
 
@@ -166,7 +169,7 @@ def main():
     pygame.init()
     args = parse_arguments()
     satellites = Satellites(args.satellite_directory, args.sampling_rate)
-    satellites.set_initial_readout(args.initial_timestamp)
+    satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, (0,0), (800, 600))
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position)
     mwl_display = ManWhoLaughsDisplay(head, earth, args.window_size)
