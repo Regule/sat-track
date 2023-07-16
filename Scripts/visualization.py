@@ -9,12 +9,13 @@ MILLISECONDS_PER_SECOND = 1000
 
 class HeadCanvas:
 
-    def __init__(self, file_path, fps, position):
+    def __init__(self, file_path, fps, position, size):
         self.video = VideoFileClip(file_path)
         self.frames = self.video.iter_frames()
         self.update_period = MILLISECONDS_PER_SECOND/(fps)
         self.time_since_last_update = self.update_period # Always update at first call 
         self.position = position
+        self.size = size
 
     def update(self, dt, screen):
         self.time_since_last_update += dt
@@ -24,11 +25,13 @@ class HeadCanvas:
         try:
             frame = next(self.frames)
             gif_surface = pygame.surfarray.make_surface(frame)
+            gif_surface = pygame.transform.scale(gif_surface, self.size)
             screen.blit(gif_surface, self.position)
         except StopIteration:
             self.frames = self.video.iter_frames()
             frame = next(self.frames)
             gif_surface = pygame.surfarray.make_surface(frame)
+            gif_surface = pygame.transform.scale(gif_surface, self.size)
             screen.blit(gif_surface, self.position)
 
 
@@ -94,7 +97,7 @@ class Satellites:
 class EarthCanvas:
 
     def __init__(self, image_path, satellites, position, size):
-        self.backdrop = pygame.image.load(image_path)#.convert()
+        self.backdrop = pygame.transform.scale(pygame.image.load(image_path), size)
         self.position = position
         self.size = size
         self.satellites = satellites
@@ -148,6 +151,8 @@ def parse_arguments():
                         help='Path to GIF file')
     parser.add_argument('--gif_fps', type=int, default=60,
                         help='Frames per second of gif animation')
+    parser.add_argument('--gif_size', type=integer_pair, default=(50,50),
+                        help='Size of animated gif')
     parser.add_argument('--gif_position', type=integer_pair, default=(0,0),
                         help='Position of top left corner of gif.')
     parser.add_argument('--window_size', type=integer_pair, default=(800,600),
@@ -162,6 +167,10 @@ def parse_arguments():
                         help='Sampling rate of satellite positions in seconds')
     parser.add_argument('--disable_timestamp_adjustment', action='store_true',
                         help='Disables adjustment of timestamps in satellite file (FOR TESTS ONLY).')
+    parser.add_argument('--display_position', type=integer_pair, default=(0,0),
+                        help='Position of earth and satellites display')
+    parser.add_argument('--display_size', type=integer_pair, default=(100,0),
+                        help='Size of display that shows earth and satellites')
     return parser.parse_args()
 
 
@@ -170,8 +179,8 @@ def main():
     args = parse_arguments()
     satellites = Satellites(args.satellite_directory, args.sampling_rate)
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
-    earth = EarthCanvas(args.earth_file, satellites, (0,0), (800, 600))
-    head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position)
+    earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size)
+    head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
     mwl_display = ManWhoLaughsDisplay(head, earth, args.window_size)
     try:
         while True:
