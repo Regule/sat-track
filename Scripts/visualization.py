@@ -62,12 +62,15 @@ class Satellites:
     def update_positions(self):
         for sat_name, sat_file in self.sats.items():
             line = sat_file.readline()
-            timestamp, lat, lon = line.split(';')
-            timestamp = int(timestamp)
-            lat = float(lat)
-            lon = float(lon)
-            position = Position(timestamp, lat, lon)
-            self.positions[sat_name] = position
+            try:
+                timestamp, lat, lon = line.split(';')
+                timestamp = int(timestamp)
+                lat = float(lat)
+                lon = float(lon)
+                position = Position(timestamp, lat, lon)
+                self.positions[sat_name] = position
+            except Exception as e:
+                pass
 
     def set_initial_readout(self, initial_timestamp=None, update_timestamps=True):
         if initial_timestamp is None:
