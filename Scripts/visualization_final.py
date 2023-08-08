@@ -100,10 +100,14 @@ class Satellites:
 class EarthCanvas:
 
     def __init__(self, image_path, satellites, position, size):
-        self.backdrop = pygame.transform.scale(pygame.image.load(image_path), size)
+        self.image_path = image_path
+        self.backdrop = None
         self.position = position
         self.size = size
         self.satellites = satellites
+
+    def reload_image(self):
+        self.backdrop = pygame.transform.scale(pygame.image.load(self.image_path), self.size)
 
     def update(self, dt, screen):
         self.satellites.update(dt)
@@ -131,6 +135,13 @@ class ManWhoLaughsDisplay:
         self.head.size = head_size
         self.head.position = head_position
         self.earth = earth
+        earth_size = (screen_size[0]*self.earth.size[0], screen_size[1]*self.earth.size[1])
+        earth_position = (screen_size[0]*self.earth.position[0], screen_size[1]*self.earth.position[1])
+        print(f'Earth position = {earth_position} Earth size = {earth_size}')
+        self.earth.position = earth_position
+        self.earth.size = earth_size
+        self.earth.reload_image()
+
         self.clock = pygame.time.Clock()
 
     def update(self):
@@ -177,9 +188,9 @@ def parse_arguments():
                         help='Sampling rate of satellite positions in seconds')
     parser.add_argument('--disable_timestamp_adjustment', action='store_true',
                         help='Disables adjustment of timestamps in satellite file (FOR TESTS ONLY).')
-    parser.add_argument('--display_position', type=integer_pair, default=(0,0),
+    parser.add_argument('--display_position', type=float_pair, default=(0.7,1.0),
                         help='Position of earth and satellites display')
-    parser.add_argument('--display_size', type=integer_pair, default=(100,0),
+    parser.add_argument('--display_size', type=float_pair, default=(0.3,0),
                         help='Size of display that shows earth and satellites')
     return parser.parse_args()
 
