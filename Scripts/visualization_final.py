@@ -1,4 +1,5 @@
 import argparse
+import math
 import serial
 from datetime import datetime
 import time
@@ -98,14 +99,23 @@ class Satellites:
         for _, file in self.sats.items():
             file.close()
 
+    def is_satellite_in_range(self, device_position, distance):
+        for position in self.positions:
+           a = position[0]-device_position[0] 
+           b = position[1]-device_position[1]
+           if math.sqrt(a*a+b*b)<distance:
+               return True
+        return False
+
 class EarthCanvas:
 
-    def __init__(self, image_path, satellites, position, size):
+    def __init__(self, image_path, satellites, position, size, device_location):
         self.image_path = image_path
         self.backdrop = None
         self.position = position
         self.size = size
         self.satellites = satellites
+        self.device_location = device_location
 
     def reload_image(self):
         self.backdrop = pygame.transform.scale(pygame.image.load(self.image_path), self.size)
@@ -114,13 +124,15 @@ class EarthCanvas:
         self.satellites.update(dt)
         screen.blit(self.backdrop, self.position)
         for _, position in self.satellites.positions.items():
-            self.draw_position(position, screen)
+            self.draw_position(position, screen, (255,255,255))
+        if self.device_location is not None:
+            self.draw_position(self.device_location, screen, (255,0,0))
 
-    def draw_position(self, position, screen):
+    def draw_position(self, position, screen, color):
         x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
         y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
         #print(f'{x} -- {y}')
-        pygame.draw.circle(screen, (255, 255, 255), (x, y), 2)
+        pygame.draw.circle(screen, color, (x, y), 2)
 
     def cleanup(self):
         self.satellites.cleanup()
@@ -243,16 +255,21 @@ def parse_arguments():
                         help='Size of display that shows earth and satellites')
     parser.add_argument('--helmet_port', type=str, default=None,
                         help='Serial port for communication with helmet.')
+    parser.add_argument('--device_location', type=float_pair, default=None,
+                        help='Lat lon')
     return parser.parse_args()
 
 
 def main():
     pygame.init()
     args = parse_arguments()
+    device_location = None
+    if args.device_location is not None:
+        device_location = Position(0, args.device_location[0], args.device_location[1])
     helmet = Helmet(args.helmet_port)
     satellites = Satellites(args.satellite_directory, args.sampling_rate)
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
-    earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size)
+    earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size, device_location)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
     mwl_display = ManWhoLaughsDisplay(head, earth, helmet)
     try:
