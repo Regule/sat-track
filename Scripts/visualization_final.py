@@ -1,4 +1,5 @@
 import argparse
+import serial
 from datetime import datetime
 import time
 import pygame
@@ -124,9 +125,57 @@ class EarthCanvas:
     def cleanup(self):
         self.satellites.cleanup()
 
+class Helmet:
+    ROZKAZ_POMPA_WLACZ = b'P'
+    ROZKAZ_POMPA_WYLACZ = b'L'
+    ROZKAZ_ODPOWIETRZANIE_WLACZ = b'O'
+    ROZKAZ_SERWO_WLACZ = b'S'
+    ROZKAZ_SERWO_WYLACZ = b'Z'
+    ROZKAZ_DEMO = b'D'
+
+    def __init__(self, serial_path):
+        if serial_path is None:
+            self.serial = None
+        else:
+            self.serial = serial.Serial(serial_path)
+
+    
+    def activate_pump(self):
+        if self.serial is None:
+            return
+        self.serial.write(Helmet.ROZKAZ_POMPA_WLACZ)
+
+    def stop_pump(self):
+        if self.serial is None:
+            return
+        self.serial.write(Helmet.ROZKAZ_POMPA_WYLACZ)
+
+    def release_pump(self):
+        if self.serial is None:
+            return
+        self.serial.write(Helmet.ROZKAZ_ODPOWIETRZANIE_WLACZ)
+
+    def activate_servo(self):
+        if self.serial is None:
+            return
+        self.serial.write(Helmet.ROZKAZ_SERWO_WLACZ)
+
+    def deactivate_servo(self):
+        if self.serial is None:
+            return
+        self.serial.write(Helmet.ROZKAZ_SERWO_WYLACZ)
+
+    def play_demo(self):
+        if self.serial is None:
+            return
+        self.serial.write(Helmet.ROZKAZ_DEMO)
+    
+
+
 class ManWhoLaughsDisplay:
 
-    def __init__(self, head, earth):
+    def __init__(self, head, earth, helmet):
+        self.helmet = helmet
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         screen_size = self.screen.get_size()
         self.head = head
@@ -192,17 +241,20 @@ def parse_arguments():
                         help='Position of earth and satellites display')
     parser.add_argument('--display_size', type=float_pair, default=(0.3,0),
                         help='Size of display that shows earth and satellites')
+    parser.add_argument('--helmet_port', type=str, default=None,
+                        help='Serial port for communication with helmet.')
     return parser.parse_args()
 
 
 def main():
     pygame.init()
     args = parse_arguments()
+    helmet = Helmet(args.helmet_port)
     satellites = Satellites(args.satellite_directory, args.sampling_rate)
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
-    mwl_display = ManWhoLaughsDisplay(head, earth)
+    mwl_display = ManWhoLaughsDisplay(head, earth, helmet)
     try:
         while True:
             mwl_display.update()
