@@ -46,6 +46,7 @@ void setup() { //ustawienia poczatkowe
   release_pump();
   serwo.attach(PIN_SERWO);
   serwo.write(SERWO_POZYCJA_SPOCZYNKOWA);
+  command_seriali.begin(9600);
 }
 
 void auto_loop() { //start programu w petli
