@@ -20,6 +20,7 @@
 #define ROZKAZ_SERWO_WLACZ 'S'
 #define ROZKAZ_SERWO_WYLACZ 'Z'
 #define ROZKAZ_BRAK_ROZKAZU 'N'
+#define ROZKAZ_DEMO 'D'
 
 
 Servo serwo;
@@ -79,6 +80,9 @@ void read_command(){
     case ROZKAZ_ODPOWIETRZANIE_WLACZ:
       release_pump();
       break;
+    case ROZKAZ_DEMO:
+    auto_loop();
+    break;
     default:
       release_pump();
   }
