@@ -7,6 +7,13 @@ import pygame
 import os
 from moviepy.editor import *
 
+#TODO : FIX DEVICE POSITION
+#TODO : TRY ADDING AuthaGraph PROJECTION
+#TODO : DISTANCE MEASUREMENTS
+#TODO : ADD SERIAL SUPPORT
+#TODO : GIF OPACITY
+#TODO : LETTERS
+
 MILLISECONDS_PER_SECOND = 1000 
 
 class HeadCanvas:
