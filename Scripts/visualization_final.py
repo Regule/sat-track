@@ -206,7 +206,7 @@ class Helmet:
 
 class ManWhoLaughsDisplay:
 
-    def __init__(self, head, earth, helmet):
+    def __init__(self, head, earth, helmet, text_field):
         self.helmet = helmet
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         screen_size = self.screen.get_size()
@@ -222,7 +222,9 @@ class ManWhoLaughsDisplay:
         self.earth.position = earth_position
         self.earth.size = earth_size
         self.earth.reload_image()
-        self.text = TextField((100,100))
+        self.text_field = text_field
+        text_position = (screen_size[0]*self.text_field.position[0], screen_size[1]*self.text_field.position[1])
+        self.text_field.position = text_position
 
         self.clock = pygame.time.Clock()
 
@@ -231,7 +233,7 @@ class ManWhoLaughsDisplay:
         dt = self.clock.tick()
         self.head.update(dt, self.screen)
         self.earth.update(dt, self.screen)
-        self.text.update(dt, self.screen)
+        self.text_field.update(dt, self.screen)
         pygame.display.flip()
 
     def handle_events(self):
@@ -279,6 +281,8 @@ def parse_arguments():
                         help='Serial port for communication with helmet.')
     parser.add_argument('--device_location', type=float_pair, default=None,
                         help='Lat lon')
+    parser.add_argument('--text_location', type=float_pair, default=(0.5, 0.5),
+                        help='Loacation at which text will be displayed')
     return parser.parse_args()
 
 
@@ -293,7 +297,8 @@ def main():
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size, device_location)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
-    mwl_display = ManWhoLaughsDisplay(head, earth, helmet)
+    text_field = TextField(args.text_location)
+    mwl_display = ManWhoLaughsDisplay(head, earth, helmet, text_field)
     try:
         while True:
             mwl_display.update()
