@@ -45,12 +45,13 @@ class HeadCanvas:
 
 class TextField:
 
-    def __init__(self, position, font_size=32):
+    def __init__(self, position, device_location, font_size=32):
         self.position = position
+        self.device_location = device_location
         self.font = pygame.font.Font('freesansbold.ttf', font_size)
 
     def update(self, dt, screen):
-        text = self.font.render('TEST MSG', True, (0,255,0), (0,0,0))
+        text = self.font.render(f'{self.device_location[0]} {self.device_location[1]}', True, (0,255,0), (0,0,0))
         textRect = text.get_rect()
         textRect.center = self.position 
         screen.blit(text, textRect)
@@ -149,9 +150,25 @@ class EarthCanvas:
             self.draw_position(self.device_location, screen, (255,0,0))
 
     def draw_position(self, position, screen, color):
-        x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
-        y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
-        #print(f'{x} -- {y}')
+        earth_radius = 6378137.0
+        max_x = earth_radius * math.pi
+        max_y = earth_radius * math.log(math.tan(math.pi/4 + math.radians(85.05112878)/2))
+    
+
+
+        lat_rad = math.radians(position.lat)
+        lon_rad = math.radians(position.lon)
+        x = earth_radius * lon_rad
+        y = earth_radius * math.log(math.tan(math.pi/4 + lat_rad/2))
+        x = x/max_x
+        y = y/max_y
+        
+        x = int((x+0.5)*self.size[0]+self.position[0])
+        y = int((y+0.5)*self.size[1]+self.position[1])
+
+        #x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
+        #y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
+        print(f'{x} -- {y}')
         pygame.draw.circle(screen, color, (x, y), 2)
 
     def cleanup(self):
@@ -297,7 +314,7 @@ def main():
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size, device_location)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
-    text_field = TextField(args.text_location)
+    text_field = TextField(args.text_location, args.device_location)
     mwl_display = ManWhoLaughsDisplay(head, earth, helmet, text_field)
     try:
         while True:
