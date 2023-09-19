@@ -43,6 +43,19 @@ class HeadCanvas:
             gif_surface = pygame.transform.scale(gif_surface, self.size)
             screen.blit(gif_surface, self.position)
 
+class TextField:
+
+    def __init__(self, position, font_size=32):
+        self.position = position
+        self.font = pygame.font.Font('freesansbold.ttf', font_size)
+
+    def update(self, dt, screen):
+        text = self.font.render('TEST MSG', True, (0,255,0), (0,0,0))
+        textRect = text.get_rect()
+        textRect.center = self.position 
+        screen.blit(text, textRect)
+
+
 
 class Position:
 
@@ -209,6 +222,7 @@ class ManWhoLaughsDisplay:
         self.earth.position = earth_position
         self.earth.size = earth_size
         self.earth.reload_image()
+        self.text = TextField((100,100))
 
         self.clock = pygame.time.Clock()
 
@@ -217,6 +231,7 @@ class ManWhoLaughsDisplay:
         dt = self.clock.tick()
         self.head.update(dt, self.screen)
         self.earth.update(dt, self.screen)
+        self.text.update(dt, self.screen)
         pygame.display.flip()
 
     def handle_events(self):
