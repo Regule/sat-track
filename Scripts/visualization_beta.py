@@ -137,3 +137,26 @@ class DisplayBox:
         pass
 
 
+class EarthCanvas(DisplayBox):
+
+    def __init__(self, position, size, image_path, satellites, device_location):
+        super.__init__(position, size)
+        self.image_path = image_path
+        self.backdrop = None
+        self.satellites = satellites
+        self.device_location = device_location
+
+    def reload_image(self):
+        self.backdrop = pg.transform.scale(pg.image.load(self.image_path), self.size)
+
+    def update(self, dt, screen):
+        self.satellites.update(dt)
+        screen.blit(self.backdrop, self.position)
+        for _, position in self.satellites.positions.items():
+            self.draw_position(position, screen, (255,255,255))
+        if self.device_location is not None:
+            self.draw_position(self.device_location, screen, (255,0,0))
+
+    def draw_position(self, position, screen, color):
+        pass
+

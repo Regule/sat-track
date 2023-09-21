@@ -150,19 +150,19 @@ class EarthCanvas:
             self.draw_position(self.device_location, screen, (255,0,0))
 
     def draw_position(self, position, screen, color):
-        earth_radius = 6378137.0
-        max_x = earth_radius * math.pi
-        max_y = earth_radius * math.log(math.tan(math.pi/4 + math.radians(85.05112878)/2))
-    
-
-
-        lat_rad = math.radians(position.lat)
-        lon_rad = math.radians(position.lon)
-        x = earth_radius * lon_rad
-        y = earth_radius * math.log(math.tan(math.pi/4 + lat_rad/2))
-        x = x/max_x
-        y = y/max_y
         
+        # Constants for AuthaGraph projection
+        radius = 1.0  # Radius of the AuthaGraph sphere
+
+        # Convert latitude and longitude to radians
+        lat_rad = math.radians(location[0])
+        lon_rad = math.radians(location[1])
+
+        # Calculate AuthaGraph coordinates
+        x = radius * (1 + 0.5 * math.cos(lat_rad) * math.cos(lon_rad))
+        y = radius * (1 + 0.5 * math.cos(lat_rad) * math.sin(lon_rad))
+        #z = radius * 0.5 * math.sin(lat_rad)
+
         x = int((x+0.5)*self.size[0]+self.position[0])
         y = int((y+0.5)*self.size[1]+self.position[1])
 
