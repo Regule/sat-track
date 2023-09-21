@@ -155,14 +155,15 @@ class EarthCanvas:
         radius = 1.0  # Radius of the AuthaGraph sphere
 
         # Convert latitude and longitude to radians
-        lat_rad = math.radians(location[0])
-        lon_rad = math.radians(location[1])
+        lat_rad = math.radians(position.lat)
+        lon_rad = math.radians(position.lon)
 
         # Calculate AuthaGraph coordinates
         x = radius * (1 + 0.5 * math.cos(lat_rad) * math.cos(lon_rad))
         y = radius * (1 + 0.5 * math.cos(lat_rad) * math.sin(lon_rad))
         #z = radius * 0.5 * math.sin(lat_rad)
 
+        print(f'{x} -- {y}')
         x = int((x+0.5)*self.size[0]+self.position[0])
         y = int((y+0.5)*self.size[1]+self.position[1])
 
