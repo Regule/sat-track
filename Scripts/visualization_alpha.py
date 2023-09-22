@@ -162,6 +162,9 @@ class EarthCanvas:
         x = radius * (1 + 0.5 * math.cos(lat_rad) * math.cos(lon_rad))
         y = radius * (1 + 0.5 * math.cos(lat_rad) * math.sin(lon_rad))
         #z = radius * 0.5 * math.sin(lat_rad)
+        
+        x = x/3.5
+        y = y/2.5
 
         print(f'{x} -- {y}')
         x = int((x+0.5)*self.size[0]+self.position[0])
