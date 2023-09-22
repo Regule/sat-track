@@ -167,8 +167,8 @@ class EarthCanvas:
         y = y/2.5
 
         print(f'{x} -- {y}')
-        x = int((x+0.5)*self.size[0]+self.position[0])
-        y = int((y+0.5)*self.size[1]+self.position[1])
+        x = int((x)*self.size[0]+self.position[0])
+        y = int((y)*self.size[1]+self.position[1])
 
         #x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
         #y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
