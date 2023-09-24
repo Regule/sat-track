@@ -6,6 +6,7 @@ import time
 import pygame
 import os
 from moviepy.editor import *
+import pyproj
 
 #TODO : FIX DEVICE POSITION
 #TODO : TRY ADDING AuthaGraph PROJECTION
@@ -149,6 +150,19 @@ class EarthCanvas:
         if self.device_location is not None:
             self.draw_position(self.device_location, screen, (255,0,0))
 
+    def lat_lon_to_xy(self, lat, lon):
+        # Define the AuthaGraph projection using Pyproj
+        authagraph_proj = pyproj.Proj("+proj=aea +lat_1=25 +lat_2=45 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80")
+
+        # Transform the latitude and longitude to x, y
+        x, y = authagraph_proj(lon, lat)
+
+        # Normalize x and y to the range [0, 1]
+        x = (x + 20037508.34) / (2 * 20037508.34)
+        y = 1 - (y + 10018754.17) / (2 * 10018754.17)
+
+        return x, y
+
     def draw_position(self, position, screen, color):
         
         # Constants for AuthaGraph projection
@@ -166,6 +180,7 @@ class EarthCanvas:
         x = x/3.5
         y = y/2.5
 
+        self.lat_lon_to_xy(position.lat, position.lon)
         print(f'{x} -- {y}')
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
@@ -271,6 +286,7 @@ def integer_pair(txt):
     return (int(val1), int(val2))
 
 def float_pair(txt):
+    txt = txt.replace('n','-')
     val1, val2 = txt.split('x')
     return (float(val1), float(val2))
 
