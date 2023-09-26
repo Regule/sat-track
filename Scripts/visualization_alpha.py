@@ -53,15 +53,20 @@ class TextField:
         self.satellites = satellites
 
     def update(self, dt, screen):
-        text = self.font.render(f'{self.device_location[0]} {self.device_location[1]}', True, (0,255,0), (0,0,0))
+        text = self.font.render(f'{self.device_location[0]:2.2f} {self.device_location[1]:2.2f}', True, (255,0,0), (0,0,0))
         textRect = text.get_rect()
         textRect.center = self.position 
         screen.blit(text, textRect)
-        if satellites is not None:
+        if self.satellites is not None:
             offset = 0
-            for satellite in satellites:
-                offset += 10
-                text = self.font.render(f'{self.device_location[0]} {self.device_location[1]}', True, (0,255,0), (0,0,0))
+            for satellite in self.satellites.positions.values():
+                offset += 60
+                text = self.font.render(f'{satellite.lat:2.2f} {satellite.lon:2.2f}', True, (0,255,0), (0,0,0))
+                textRect = text.get_rect()
+                center = list(self.position) 
+                center[1] += offset
+                textRect.center = center
+                screen.blit(text, textRect)
 
 
 
@@ -275,6 +280,7 @@ class ManWhoLaughsDisplay:
     def update(self):
         self.handle_events()
         dt = self.clock.tick()
+        #self.screen.fill((0,0,0))
         self.head.update(dt, self.screen)
         self.earth.update(dt, self.screen)
         self.text_field.update(dt, self.screen)
@@ -342,7 +348,7 @@ def main():
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size, device_location)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
-    text_field = TextField(args.text_location, args.device_location)
+    text_field = TextField(args.text_location, args.device_location, satellites=satellites)
     mwl_display = ManWhoLaughsDisplay(head, earth, helmet, text_field)
     try:
         while True:
