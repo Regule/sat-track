@@ -153,13 +153,15 @@ class EarthCanvas:
     def lat_lon_to_xy(self, lat, lon):
         # Define the AuthaGraph projection using Pyproj
         authagraph_proj = pyproj.Proj("+proj=aea +lat_1=25 +lat_2=45 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80")
-
+        mercator = pyproj.Proj(proj='merc', lat_ts=0, lon_0=5, x_0=0, y_0=0, ellps='WGS84')
+        
         # Transform the latitude and longitude to x, y
-        x, y = authagraph_proj(lon, lat)
+        x, y = mercator(lon, lat)
 
         # Normalize x and y to the range [0, 1]
         x = (x + 20037508.34) / (2 * 20037508.34)
-        y = 1 - (y + 10018754.17) / (2 * 10018754.17)
+        y = (y + 20037508.34) / (2 * 20037508.34)
+        #y = 1 - (y + 10018754.17) / (2 * 10018754.17)
 
         return x, y
 
@@ -180,7 +182,7 @@ class EarthCanvas:
         x = x/3.5
         y = y/2.5
 
-        self.lat_lon_to_xy(position.lat, position.lon)
+        x,y = self.lat_lon_to_xy(position.lat, position.lon)
         print(f'{x} -- {y}')
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
