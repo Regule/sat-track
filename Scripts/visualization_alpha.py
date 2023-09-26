@@ -46,16 +46,22 @@ class HeadCanvas:
 
 class TextField:
 
-    def __init__(self, position, device_location, font_size=32):
+    def __init__(self, position, device_location, font_size=32, satellites=None):
         self.position = position
         self.device_location = device_location
         self.font = pygame.font.Font('freesansbold.ttf', font_size)
+        self.satellites = satellites
 
     def update(self, dt, screen):
         text = self.font.render(f'{self.device_location[0]} {self.device_location[1]}', True, (0,255,0), (0,0,0))
         textRect = text.get_rect()
         textRect.center = self.position 
         screen.blit(text, textRect)
+        if satellites is not None:
+            offset = 0
+            for satellite in satellites:
+                offset += 10
+                text = self.font.render(f'{self.device_location[0]} {self.device_location[1]}', True, (0,255,0), (0,0,0))
 
 
 
@@ -168,28 +174,28 @@ class EarthCanvas:
     def draw_position(self, position, screen, color):
         
         # Constants for AuthaGraph projection
-        radius = 1.0  # Radius of the AuthaGraph sphere
+        #radius = 1.0  # Radius of the AuthaGraph sphere
 
         # Convert latitude and longitude to radians
-        lat_rad = math.radians(position.lat)
-        lon_rad = math.radians(position.lon)
+        #lat_rad = math.radians(position.lat)
+        #lon_rad = math.radians(position.lon)
 
         # Calculate AuthaGraph coordinates
-        x = radius * (1 + 0.5 * math.cos(lat_rad) * math.cos(lon_rad))
-        y = radius * (1 + 0.5 * math.cos(lat_rad) * math.sin(lon_rad))
+        #x = radius * (1 + 0.5 * math.cos(lat_rad) * math.cos(lon_rad))
+        #y = radius * (1 + 0.5 * math.cos(lat_rad) * math.sin(lon_rad))
         #z = radius * 0.5 * math.sin(lat_rad)
         
-        x = x/3.5
-        y = y/2.5
+        #x = x/3.5
+        #y = y/2.5
 
         x,y = self.lat_lon_to_xy(position.lat, position.lon)
-        print(f'{x} -- {y}')
+        #print(f'{x} -- {y}')
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
 
         #x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
         #y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
-        print(f'{x} -- {y}')
+        #print(f'{x} -- {y}')
         pygame.draw.circle(screen, color, (x, y), 2)
 
     def cleanup(self):
