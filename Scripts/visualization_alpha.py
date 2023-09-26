@@ -151,6 +151,8 @@ class EarthCanvas:
         self.device_location = device_location
 
     def reload_image(self):
+        print(self.size)
+        #sys.exit()
         self.backdrop = pygame.transform.scale(pygame.image.load(self.image_path), self.size)
 
     def update(self, dt, screen):
@@ -162,46 +164,42 @@ class EarthCanvas:
             self.draw_position(self.device_location, screen, (255,0,0))
 
     def lat_lon_to_xy(self, lat, lon):
-        # Define the AuthaGraph projection using Pyproj
-        authagraph_proj = pyproj.Proj("+proj=aea +lat_1=25 +lat_2=45 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +ellps=GRS80")
-        mercator = pyproj.Proj(proj='merc', lat_ts=0, lon_0=5, x_0=0, y_0=0, ellps='WGS84')
-        
-        # Transform the latitude and longitude to x, y
+        mercator = pyproj.Proj(proj='merc', lat_ts=0, lon_0=0, x_0=0, y_0=0, ellps='WGS84')
         x, y = mercator(lon, lat)
-
         # Normalize x and y to the range [0, 1]
         x = (x + 20037508.34) / (2 * 20037508.34)
         y = (y + 20037508.34) / (2 * 20037508.34)
         #y = 1 - (y + 10018754.17) / (2 * 10018754.17)
+        return x, y
+
+    def mercator_projection(self, longitude, latitude):
+        # Define the Mercator projection bounds
+        max_longitude = 180.0
+        min_longitude = -180.0
+        max_latitude = 85.051129
+        min_latitude = -85.051129
+
+        # Clamp the longitude and latitude within the bounds
+        longitude = max(min(longitude, max_longitude), min_longitude)
+        latitude = max(min(latitude, max_latitude), min_latitude)
+
+        # Convert latitude and longitude to radians
+        lat_rad = math.radians(latitude)
+
+        # Perform the Mercator projection
+        x = (longitude + 180.0) / 360.0
+        y = (1.0 - math.log(math.tan(lat_rad) + 1.0 / math.cos(lat_rad)) / math.pi) / 2.0
 
         return x, y
 
     def draw_position(self, position, screen, color):
-        
-        # Constants for AuthaGraph projection
-        #radius = 1.0  # Radius of the AuthaGraph sphere
-
-        # Convert latitude and longitude to radians
-        #lat_rad = math.radians(position.lat)
-        #lon_rad = math.radians(position.lon)
-
-        # Calculate AuthaGraph coordinates
-        #x = radius * (1 + 0.5 * math.cos(lat_rad) * math.cos(lon_rad))
-        #y = radius * (1 + 0.5 * math.cos(lat_rad) * math.sin(lon_rad))
-        #z = radius * 0.5 * math.sin(lat_rad)
-        
-        #x = x/3.5
-        #y = y/2.5
-
-        x,y = self.lat_lon_to_xy(position.lat, position.lon)
-        #print(f'{x} -- {y}')
+        x,y = self.mercator_projection(position.lon, position.lat)
+        #x,y = self.lat_lon_to_xy(position.lat, position.lon)
+        #x = 0.5
+        #y = 0.5
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
-
-        #x = int((position.lon + 180) * (self.size[0] / 360))+self.position[0]
-        #y = int((90 - position.lat) * (self.size[1] / 180))+self.position[1]
-        #print(f'{x} -- {y}')
-        pygame.draw.circle(screen, color, (x, y), 2)
+        pygame.draw.circle(screen, color, (x, y), 5)
 
     def cleanup(self):
         self.satellites.cleanup()
