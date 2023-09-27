@@ -1,0 +1,1 @@
+ python Scripts/visualization_alpha.py -g local/HeadAnimation_BW.gif -e local/merkator2.png  -s local/satellites --disable_timestamp_adjustment --display_position 0.3x0.0  --display_size 0.7x1.0 --gif_size 0.20x0.23 --sampling_rate 1 --device_location 52x21 --text_location 0.1x0.0 --gif_fps 30 --gif_position 0.02x0.6 --text2_location 0.15x0.91

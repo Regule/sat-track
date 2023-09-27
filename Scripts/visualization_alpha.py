@@ -53,7 +53,7 @@ class TextField:
             offset = 0
             for satellite in self.satellites.positions.values():
                 offset += 60
-                text = self.font.render(f'{satellite.lat:2.2f} {satellite.lon:2.2f}', True, (0,255,0), (0,0,0))
+                text = self.font.render(f'{satellite.lat:2.2f} {satellite.lon:2.2f}', True, (255,255,255), (0,0,0))
                 textRect = text.get_rect()
                 center = list(self.position) 
                 center[1] += offset
@@ -68,7 +68,7 @@ class TextField2:
         self.font = pygame.font.Font('freesansbold.ttf', font_size)
 
     def update(self, dt, screen):
-        text = self.font.render(f'{self.device_location[0]:2.2f} {self.device_location[1]:2.2f}', True, (255,0,0), (0,0,0))
+        text = self.font.render(f'{self.device_location[0]:2.2f} {self.device_location[1]:2.2f}', True, (255,255,255), (0,0,0))
         textRect = text.get_rect()
         textRect.center = self.position 
         screen.blit(text, textRect)
@@ -167,7 +167,7 @@ class EarthCanvas:
         for _, position in self.satellites.positions.items():
             self.draw_position(position, screen, (0,255,0))
         if self.device_location is not None:
-            self.draw_position(self.device_location, screen, (255,0,0))
+            self.draw_position(self.device_location, screen, (255,255,255))
 
     def mercator_projection(self, longitude, latitude):
         # Define the Mercator projection bounds
