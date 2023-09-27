@@ -6,7 +6,6 @@ import time
 import pygame
 import os
 from moviepy.editor import *
-import pyproj
 
 #TODO : FIX DEVICE POSITION
 #TODO : TRY ADDING AuthaGraph PROJECTION
@@ -159,18 +158,9 @@ class EarthCanvas:
         self.satellites.update(dt)
         screen.blit(self.backdrop, self.position)
         for _, position in self.satellites.positions.items():
-            self.draw_position(position, screen, (255,255,255))
+            self.draw_position(position, screen, (0,255,0))
         if self.device_location is not None:
             self.draw_position(self.device_location, screen, (255,0,0))
-
-    def lat_lon_to_xy(self, lat, lon):
-        mercator = pyproj.Proj(proj='merc', lat_ts=0, lon_0=0, x_0=0, y_0=0, ellps='WGS84')
-        x, y = mercator(lon, lat)
-        # Normalize x and y to the range [0, 1]
-        x = (x + 20037508.34) / (2 * 20037508.34)
-        y = (y + 20037508.34) / (2 * 20037508.34)
-        #y = 1 - (y + 10018754.17) / (2 * 10018754.17)
-        return x, y
 
     def mercator_projection(self, longitude, latitude):
         # Define the Mercator projection bounds
