@@ -11,8 +11,6 @@ from moviepy.editor import *
 #TODO : TRY ADDING AuthaGraph PROJECTION
 #TODO : DISTANCE MEASUREMENTS
 #TODO : ADD SERIAL SUPPORT
-#TODO : GIF OPACITY
-#TODO : LETTERS
 
 MILLISECONDS_PER_SECOND = 1000 
 
@@ -45,17 +43,12 @@ class HeadCanvas:
 
 class TextField:
 
-    def __init__(self, position, device_location, font_size=32, satellites=None):
+    def __init__(self, position, font_size=22, satellites=None):
         self.position = position
-        self.device_location = device_location
         self.font = pygame.font.Font('freesansbold.ttf', font_size)
         self.satellites = satellites
 
     def update(self, dt, screen):
-        text = self.font.render(f'{self.device_location[0]:2.2f} {self.device_location[1]:2.2f}', True, (255,0,0), (0,0,0))
-        textRect = text.get_rect()
-        textRect.center = self.position 
-        screen.blit(text, textRect)
         if self.satellites is not None:
             offset = 0
             for satellite in self.satellites.positions.values():
@@ -66,6 +59,20 @@ class TextField:
                 center[1] += offset
                 textRect.center = center
                 screen.blit(text, textRect)
+
+class TextField2:
+
+    def __init__(self, position, device_location, font_size=32):
+        self.position = position
+        self.device_location = device_location
+        self.font = pygame.font.Font('freesansbold.ttf', font_size)
+
+    def update(self, dt, screen):
+        text = self.font.render(f'{self.device_location[0]:2.2f} {self.device_location[1]:2.2f}', True, (255,0,0), (0,0,0))
+        textRect = text.get_rect()
+        textRect.center = self.position 
+        screen.blit(text, textRect)
+
 
 
 
@@ -243,7 +250,7 @@ class Helmet:
 
 class ManWhoLaughsDisplay:
 
-    def __init__(self, head, earth, helmet, text_field):
+    def __init__(self, head, earth, helmet, text_field, text_field2):
         self.helmet = helmet
         self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
         screen_size = self.screen.get_size()
@@ -262,7 +269,9 @@ class ManWhoLaughsDisplay:
         self.text_field = text_field
         text_position = (screen_size[0]*self.text_field.position[0], screen_size[1]*self.text_field.position[1])
         self.text_field.position = text_position
-
+        self.text_field2 = text_field2
+        text_position = (screen_size[0]*self.text_field2.position[0], screen_size[1]*self.text_field2.position[1])
+        self.text_field2.position = text_position
         self.clock = pygame.time.Clock()
 
     def update(self):
@@ -272,6 +281,7 @@ class ManWhoLaughsDisplay:
         self.head.update(dt, self.screen)
         self.earth.update(dt, self.screen)
         self.text_field.update(dt, self.screen)
+        self.text_field2.update(dt, self.screen)
         pygame.display.flip()
 
     def handle_events(self):
@@ -322,6 +332,8 @@ def parse_arguments():
                         help='Lat lon')
     parser.add_argument('--text_location', type=float_pair, default=(0.5, 0.5),
                         help='Loacation at which text will be displayed')
+    parser.add_argument('--text2_location', type=float_pair, default=(0.5, 0.5),
+                        help='Loacation at which text will be displayed')
     return parser.parse_args()
 
 
@@ -336,8 +348,9 @@ def main():
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size, device_location)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
-    text_field = TextField(args.text_location, args.device_location, satellites=satellites)
-    mwl_display = ManWhoLaughsDisplay(head, earth, helmet, text_field)
+    text_field2 = TextField2(args.text2_location, args.device_location)
+    text_field = TextField(args.text_location, satellites=satellites)
+    mwl_display = ManWhoLaughsDisplay(head, earth, helmet, text_field, text_field2)
     try:
         while True:
             mwl_display.update()
