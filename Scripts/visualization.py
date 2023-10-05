@@ -50,15 +50,22 @@ class TextField:
 
     def update(self, dt, screen):
         if self.satellites is not None:
-            offset = 0
+            row_offset = 60
+            column_offset = 180
+            row = 0
+            column = 0
             for satellite in self.satellites.positions.values():
-                offset += 60
+                if row > 5:
+                    column += 1
+                    row = 0
                 text = self.font.render(f'{satellite.lat:2.2f} {satellite.lon:2.2f}', True, (255,255,255), (0,0,0))
                 textRect = text.get_rect()
                 center = list(self.position) 
-                center[1] += offset
+                center[0] += column * column_offset
+                center[1] += row * row_offset
                 textRect.center = center
                 screen.blit(text, textRect)
+                row += 1
 
 class TextField2:
 
