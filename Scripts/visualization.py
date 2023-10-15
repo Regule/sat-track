@@ -295,6 +295,17 @@ class ManWhoLaughsDisplay:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 raise StopIteration
+            elif event.type == pygame.KEYDOWN:
+                if event.key == ord('a'):
+                    self.helmet.activate_pump()
+                elif event.key == ord('s'):
+                    self.helmet.stop_pump()
+                elif event.key == ord('d'):
+                    self.helmet.release_pump()
+                elif event.key == ord('z'):
+                    self.helmet.activate_servo()
+                elif event.key == ord('x'):
+                    self.helmet.deactivate_servo()
 
     def cleanup(self):
         self.earth.cleanup()
