@@ -38,9 +38,10 @@ class HeadCanvas:
 
 class TextField:
 
-    def __init__(self, position, font_size=22, satellites=None):
+    def __init__(self, position, font_size=22, satellites=None, 
+                 font_type='freesansbold.ttf'):
         self.position = position
-        self.font = pygame.font.Font('freesansbold.ttf', font_size)
+        self.font = pygame.font.Font(font_type, font_size)
         self.satellites = satellites
 
     def update(self, dt, screen):
@@ -64,10 +65,11 @@ class TextField:
 
 class TextField2:
 
-    def __init__(self, position, device_location, font_size=32):
+    def __init__(self, position, device_location, font_size=32,
+                 font_type='freesansbold.ttf'):
         self.position = position
         self.device_location = device_location
-        self.font = pygame.font.Font('freesansbold.ttf', font_size)
+        self.font = pygame.font.Font(font_type, font_size)
 
     def update(self, dt, screen):
         text = self.font.render(f'{self.device_location[0]:2.2f} {self.device_location[1]:2.2f}', True, (255,255,255), (0,0,0))
@@ -150,13 +152,17 @@ class Satellites:
 
 class EarthCanvas:
 
-    def __init__(self, image_path, satellites, position, size, device_location):
+    def __init__(self, image_path, satellites, position,
+                 size, device_location, alert_distance=0.0,
+                 helmet=None):
         self.image_path = image_path
         self.backdrop = None
         self.position = position
         self.size = size
         self.satellites = satellites
         self.device_location = device_location
+        self.alert_distance = alert_distance
+        self.helmet = helmet
 
     def reload_image(self):
         print(self.size)
@@ -166,10 +172,21 @@ class EarthCanvas:
     def update(self, dt, screen):
         self.satellites.update(dt)
         screen.blit(self.backdrop, self.position)
-        for _, position in self.satellites.positions.items():
-            self.draw_position(position, screen, (0,255,0))
+        dev_pos = None
+        alert = False
         if self.device_location is not None:
-            self.draw_position(self.device_location, screen, (255,255,255))
+            dev_pos = self.draw_position(self.device_location, screen, (255,255,255))
+        for _, position in self.satellites.positions.items():
+            sat_pos = self.draw_position(position, screen, (0,255,0))
+            dist = (dev_pos[0] - sat_pos[0])**2 + (dev_pos[0] - sat_pos[0])**2
+            dist = math.sqrt(dist)
+            if dist < self.alert_distance:
+                alert = True
+        if self.helmet is not None:
+            if alert:
+                self.helmet.activate_pump()
+            else:
+                self.helmet.release_pump()
 
     def mercator_projection(self, longitude, latitude):
         # Define the Mercator projection bounds
@@ -199,6 +216,7 @@ class EarthCanvas:
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
         pygame.draw.circle(screen, color, (x, y), 5)
+        return x, y
 
     def cleanup(self):
         self.satellites.cleanup()
@@ -353,6 +371,8 @@ def parse_arguments():
                         help='Size of font for satellite locations')
     parser.add_argument('--font_type', type=str, default='freesansbold.ttf',
                         help='Type of font used in application')
+    parser.add_argument('--alert_distance', type=str, default=10.0,
+                        help='Distance')
     return parser.parse_args()
 
 
@@ -365,10 +385,13 @@ def main():
     helmet = Helmet(args.helmet_port)
     satellites = Satellites(args.satellite_directory, args.sampling_rate)
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
-    earth = EarthCanvas(args.earth_file, satellites, args.display_position, args.display_size, device_location)
+    earth = EarthCanvas(args.earth_file, satellites, args.display_position,
+                        args.display_size, device_location, helmet)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
-    text_field2 = TextField2(args.text2_location, args.device_location)
-    text_field = TextField(args.text_location, satellites=satellites)
+    text_field2 = TextField2(args.text2_location, args.device_location,
+                             font_size=args.dev_font_size, font_type=args.font_type)
+    text_field = TextField(args.text_location, satellites=satellites,
+                           font_size=args.sat_font_size, font_type=args.font_type)
     mwl_display = ManWhoLaughsDisplay(head, earth, helmet, text_field, text_field2)
     try:
         while True:
