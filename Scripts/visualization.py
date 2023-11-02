@@ -5,12 +5,7 @@ from datetime import datetime
 import time
 import pygame
 import os
-from moviepy.editor import *
-
-#TODO : FIX DEVICE POSITION
-#TODO : TRY ADDING AuthaGraph PROJECTION
-#TODO : DISTANCE MEASUREMENTS
-#TODO : ADD SERIAL SUPPORT
+from moviepy.editor import VideoFileClip
 
 MILLISECONDS_PER_SECOND = 1000 
 
@@ -117,8 +112,8 @@ class Satellites:
                 lon = float(lon)
                 position = Position(timestamp, lat, lon)
                 self.positions[sat_name] = position
-            except Exception as e:
-                pass
+            except Exception:
+                pass # If updating fails just ignore it
 
     def set_initial_readout(self, initial_timestamp=None, update_timestamps=True):
         if initial_timestamp is None:
@@ -352,6 +347,12 @@ def parse_arguments():
                         help='Loacation at which text will be displayed')
     parser.add_argument('--text2_location', type=float_pair, default=(0.5, 0.5),
                         help='Loacation at which text will be displayed')
+    parser.add_argument('--sat_font_size', type=int, default=32,
+                        help='Size of font for satellite locations')
+    parser.add_argument('--dev_font_size', type=int, default=32,
+                        help='Size of font for satellite locations')
+    parser.add_argument('--font_type', type=str, default='freesansbold.ttf',
+                        help='Type of font used in application')
     return parser.parse_args()
 
 
