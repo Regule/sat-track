@@ -371,7 +371,7 @@ def parse_arguments():
                         help='Size of font for satellite locations')
     parser.add_argument('--font_type', type=str, default='freesansbold.ttf',
                         help='Type of font used in application')
-    parser.add_argument('--alert_distance', type=str, default=10.0,
+    parser.add_argument('--alert_distance', type=float, default=10.0,
                         help='Distance')
     return parser.parse_args()
 
@@ -386,7 +386,8 @@ def main():
     satellites = Satellites(args.satellite_directory, args.sampling_rate)
     satellites.set_initial_readout(args.initial_timestamp, not args.disable_timestamp_adjustment)
     earth = EarthCanvas(args.earth_file, satellites, args.display_position,
-                        args.display_size, device_location, helmet)
+                        args.display_size, device_location, helmet=helmet,
+                        alert_distance=args.alert_distance)
     head = HeadCanvas(args.gif_file, args.gif_fps, args.gif_position, args.gif_size)
     text_field2 = TextField2(args.text2_location, args.device_location,
                              font_size=args.dev_font_size, font_type=args.font_type)
@@ -398,6 +399,9 @@ def main():
             mwl_display.update()
     except StopIteration:
         print('Stopped')
+        mwl_display.cleanup()
+    except Exception as e:
+        print(f'Unexpected exception -> {e}')
         mwl_display.cleanup()
 
 if __name__ == '__main__':
