@@ -175,13 +175,15 @@ class EarthCanvas:
         dev_pos = None
         alert = False
         if self.device_location is not None:
-            dev_pos = self.draw_position(self.device_location, screen, (255,255,255))
+            dev_pos = self.draw_position(self.device_location, screen, (255,0,0))
+            self.draw_range(self.device_location, screen, (255,0,0), self.alert_distance)
         for _, position in self.satellites.positions.items():
-            sat_pos = self.draw_position(position, screen, (0,255,0))
+            sat_pos = self.draw_position(position, screen, (255,255,255))
             dist = (dev_pos[0] - sat_pos[0])**2 + (dev_pos[0] - sat_pos[0])**2
             dist = math.sqrt(dist)
             if dist < self.alert_distance:
                 alert = True
+                self.draw_position(position, screen, (0,255,0))
         if self.helmet is not None:
             if alert:
                 self.helmet.activate_pump()
@@ -216,6 +218,13 @@ class EarthCanvas:
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
         pygame.draw.circle(screen, color, (x, y), 5)
+        return x, y
+
+    def draw_range(self, position, screen, color, radius):
+        x,y = self.mercator_projection(position.lon, position.lat)
+        x = int((x)*self.size[0]+self.position[0])
+        y = int((y)*self.size[1]+self.position[1])
+        pygame.draw.circle(screen, color, (x, y), radius, width=2)
         return x, y
 
     def cleanup(self):
