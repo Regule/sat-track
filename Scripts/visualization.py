@@ -8,6 +8,7 @@ import os
 from moviepy.editor import VideoFileClip
 
 MILLISECONDS_PER_SECOND = 1000 
+enable_debug = False
 
 class HeadCanvas:
 
@@ -176,14 +177,16 @@ class EarthCanvas:
         alert = False
         if self.device_location is not None:
             dev_pos = self.draw_position(self.device_location, screen, (255,0,0))
-            self.draw_range(self.device_location, screen, (255,0,0), self.alert_distance)
+            if enable_debug:
+                self.draw_range(self.device_location, screen, (255,0,0), self.alert_distance)
         for _, position in self.satellites.positions.items():
             sat_pos = self.draw_position(position, screen, (255,255,255))
             dist = (dev_pos[0] - sat_pos[0])**2 + (dev_pos[1] - sat_pos[1])**2
             dist = math.sqrt(dist)
             if dist < self.alert_distance:
                 alert = True
-                self.draw_position(position, screen, (0,255,0))
+                if enable_debug:
+                    self.draw_position(position, screen, (0,255,0))
         if self.helmet is not None:
             if alert:
                 self.helmet.activate_pump()
@@ -212,9 +215,6 @@ class EarthCanvas:
 
     def draw_position(self, position, screen, color):
         x,y = self.mercator_projection(position.lon, position.lat)
-        #x,y = self.lat_lon_to_xy(position.lat, position.lon)
-        #x = 0.5
-        #y = 0.5
         x = int((x)*self.size[0]+self.position[0])
         y = int((y)*self.size[1]+self.position[1])
         pygame.draw.circle(screen, color, (x, y), 5)
@@ -382,12 +382,16 @@ def parse_arguments():
                         help='Type of font used in application')
     parser.add_argument('--alert_distance', type=float, default=10.0,
                         help='Distance')
+    parser.add_argument('--enable_debug', action='store_true',
+                        help='Enables debug information')
     return parser.parse_args()
 
 
 def main():
+    global enable_debug
     pygame.init()
     args = parse_arguments()
+    enable_debug = args.enable_debug
     device_location = None
     if args.device_location is not None:
         device_location = Position(0, args.device_location[0], args.device_location[1])
