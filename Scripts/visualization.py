@@ -179,7 +179,7 @@ class EarthCanvas:
             self.draw_range(self.device_location, screen, (255,0,0), self.alert_distance)
         for _, position in self.satellites.positions.items():
             sat_pos = self.draw_position(position, screen, (255,255,255))
-            dist = (dev_pos[0] - sat_pos[0])**2 + (dev_pos[0] - sat_pos[0])**2
+            dist = (dev_pos[0] - sat_pos[0])**2 + (dev_pos[1] - sat_pos[1])**2
             dist = math.sqrt(dist)
             if dist < self.alert_distance:
                 alert = True
